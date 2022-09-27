@@ -1,0 +1,23 @@
+{
+CONJ: simb1 -> !   ~     );
+CONJ: simb2 -> + ~ .;
+CONJ: simb3 -> / ~<;
+CONJ: digito -> 0~ 9;
+CONJ: minusculas -> a ~z;
+CONJ: mayusculas -> A~   Z;
+RegEx -> . "L" * | "L" "D";
+RegEx1 -> . . . * | "a" "b" "a" "b" "b";
+//ExpReg1 -> . {letra} * | "_" | {letra} {digito};
+ExpresionReg2 -> . + {digito} . "." + {digito};
+RegEx3 -> . {digito} * | "_" | {letra} {digito};
+reg -> . | * "a" "b" "b";
+regexPropios -> . {mayusculas} + {minusculas};
+Compi3 -> . . . . + | . "a" + "b" . ? "c" . "d" * "r" * | "a" "3" "t" "s" | + "a" "f";
+%%
+%%
+RegEx1 : "abababbbababababaaabbbabb";
+RegEx1 : "aaabbbbbaba";
+ExpresionReg2 : "4783214567897.7809";
+ExpresionReg2 : "7879.233232.";
+regexPropios : "xhunikgod";
+}

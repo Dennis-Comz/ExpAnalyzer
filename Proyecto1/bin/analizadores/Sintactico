@@ -1,0 +1,117 @@
+package analizadores; 
+import java_cup.runtime.*;
+import java.util.ArrayList;
+import objects.Error_;
+import objects.*;
+import references.*;
+import proyecto1.*;
+import objects.BinaryTree.Tree_Node;
+
+parser code 
+{:
+    /**
+     * Método al que se llama automáticamente ante algún error sintactico.
+     **/ 
+    public void syntax_error(Symbol s){
+        ErrorRef.list.addError(new Error_("Se ha detectado un error de sintaxis.", "SINTACTICO", String.valueOf(s.value), String.valueOf(s.left), String.valueOf(s.right)));
+    } 
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintáctico 
+     * en el que ya no es posible una recuperación de errores.
+     **/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        // ErrorRef.list.addError(new Error_("Error de Sintaxis -> No se esperaba: ", "SINTACTICO IRRECUPERABLE", String.valueOf(s.value), String.valueOf(s.left), String.valueOf(s.right)));
+    }  
+:} 
+
+// terminales de simbolos
+terminal String MAS, PORCENTAJE, ASTERISCO, PREGUNTA, SYM_ENIE;
+terminal String MAYORQUE, LLAVEIZQ, LLAVEDER, BARRA, PUNTO;
+terminal String COMA, DOSPT, PTCOMA, GUION;
+
+// terminales de palabras reservadas
+terminal String CONJ;
+// terminales de letras, digitos, simbolos  u otros
+terminal String LETRA, DECIMAL, CADENA, ENTERO, SIMBOLO, ERROR;
+
+// No terminales para formar la gramatica
+non terminal ini, instrucciones, regex, expresion;
+non terminal bloque_regex;
+non terminal variable, parametro, conjunto, bloque_coma;
+non terminal resto, simbs_varios;
+
+start with ini;
+
+ini::= LLAVEIZQ instrucciones
+;
+
+instrucciones ::= conjunto instrucciones
+    | regex instrucciones
+    | expresion instrucciones
+    | PORCENTAJE instrucciones
+    | LLAVEDER
+;
+
+conjunto ::= CONJ DOSPT variable:name GUION MAYORQUE parametro:inter PTCOMA {:if(inter != null){Conjunto.list.addParam(new Intervalo(new String(name.toString()), new String(inter.toString())));}:}
+;
+regex ::= variable:name GUION MAYORQUE bloque_regex:brg PTCOMA {:if(brg != null){Tree.list.addTree(new String(name.toString()),(Tree_Node)brg);}:}
+;
+expresion ::= variable:name DOSPT CADENA:valor PTCOMA {:if(valor != null){Cadena.list.addCadena(new String(name.toString()), new String(valor.toString()));}:}
+;
+// Se agrego que pueda reconocer nombre como 'regex_1'
+variable ::= LETRA:l ENTERO:e variable:v {:RESULT=l+e+v;:}
+    | LETRA:l SIMBOLO:s variable:v {:RESULT=l+s+v;:}
+    | LETRA:l ENTERO:e {:RESULT=l+e;:}
+    | LETRA:l SIMBOLO:s {:RESULT=l+s;:}
+    | LETRA:l {:RESULT=l;:}
+    | SIMBOLO:s {:RESULT=s;:}
+    | ENTERO:e {:RESULT=e;:}
+;
+// SE AGREGO LA CADENA 
+parametro ::= LETRA:l bloque_coma:r {:RESULT = (l.toString()+r.toString());:}
+    | ENTERO:e bloque_coma:r {:RESULT = (e.toString()+r.toString());:}
+    | SIMBOLO:s bloque_coma:r {:RESULT = (s.toString()+r.toString());:}
+    | CADENA:c bloque_coma:r {:RESULT = (c.toString()+r.toString());:}
+    | simbs_varios:sv bloque_coma:r {:RESULT = (sv.toString()+r.toString());:}
+    | LETRA:l SYM_ENIE LETRA:l2 {:RESULT=l+"~"+l2;:}
+    | ENTERO:e SYM_ENIE ENTERO:e2 {:RESULT=e+"~"+e2;:}
+    | SIMBOLO:s SYM_ENIE SIMBOLO:s2 {:RESULT=s+"~"+s2;:}
+    | simbs_varios:sv SYM_ENIE SIMBOLO:s {:RESULT=sv.toString()+"~"+s;:}
+    | simbs_varios:sv SYM_ENIE simbs_varios:sv2 {:RESULT=sv+"~"+sv2.toString();:}
+    | SIMBOLO:s SYM_ENIE simbs_varios:sv {:RESULT=s+"~"+sv.toString();:}
+;
+// SE AGREGO LA CADENA
+bloque_coma ::= COMA LETRA:l bloque_coma:x {:if(x == null){RESULT="¿"+l;}else{RESULT="¿"+l+x;}:}
+    | COMA ENTERO:e bloque_coma:x {:if(x == null){RESULT="¿"+e;}else{RESULT="¿"+e+x;}:}
+    | COMA SIMBOLO:s bloque_coma:x {:if(x == null){RESULT="¿"+s;}else{RESULT="¿"+s+x;}:}
+    | COMA CADENA:c bloque_coma:x {:if(x == null){RESULT="¿"+c;}else{RESULT="¿"+c+x;}:}
+    | COMA simbs_varios:sv bloque_coma:x {:if(x == null){RESULT="¿"+sv;}else{RESULT="¿"+sv+x;}:}
+    | LETRA:l {:RESULT=l;:}
+    | ENTERO:e {:RESULT=e;:}
+    | SIMBOLO:s {:RESULT=s;:}
+    | CADENA:c {:RESULT=c;:}
+    | simbs_varios:sv {:RESULT=sv.toString();:}
+    |
+;
+simbs_varios ::= MAS:m {:RESULT=m;:}
+    | PORCENTAJE:p {:RESULT=p;:}
+    | ASTERISCO:a {:RESULT=a;:}
+    | PREGUNTA:pr {:RESULT=pr;:}
+    | MAYORQUE:mq {:RESULT=mq;:}
+    | LLAVEIZQ:li {:RESULT=li;:}
+    | LLAVEDER:ld {:RESULT=ld;:}
+    | BARRA:b {:RESULT=b;:}
+    | PUNTO:pt {:RESULT=pt;:}
+    | DOSPT:dospt {:RESULT=dospt;:}
+    | GUION:g {:RESULT=g;:}
+;
+// Al valor entre las llaves se le cambio al 'variable' para que pueda reconocer los mismos conjuntos
+bloque_regex ::= ASTERISCO:as bloque_regex:x {:RESULT= new Tree_Node("*", (Tree_Node)x, null);:}
+    | PUNTO:pt bloque_regex:x bloque_regex:y {:RESULT= new Tree_Node(".", (Tree_Node)x, (Tree_Node)y);:}
+    | BARRA:br bloque_regex:x bloque_regex:y {:RESULT= new Tree_Node("|", (Tree_Node)x, (Tree_Node)y);:}
+    | MAS:m bloque_regex:x {:RESULT= new Tree_Node("+", (Tree_Node)x, null);:}
+    | PREGUNTA:p bloque_regex:x {:RESULT= new Tree_Node("?", (Tree_Node)x, null);:}
+    | LLAVEIZQ:li variable:l LLAVEDER:ld {:String r = li.toString() + l.toString() + ld.toString();RESULT= new Tree_Node(new String(r.toString()), null, null);:}
+    | CADENA:c {:RESULT=new Tree_Node(new String(c.toString()), null, null);:}
+;

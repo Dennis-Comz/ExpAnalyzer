@@ -1,0 +1,61 @@
+package analizadores;
+import objects.Error_;
+import objects.*;
+import references.*;
+import java_cup.runtime.Symbol; 
+
+%% 
+%class Lexico
+%public 
+%line 
+%char 
+%cup 
+%unicode
+%ignorecase
+
+%init{ 
+    yyline = 1; 
+    yycolumn = 1; 
+%init} 
+
+BLANCOS=[ \r\t]+
+D=[0-9]+
+DD=[0-9]+("."[  |0-9]+)?
+L=[A-Za-z]+[0-9]*
+CADENA=[\"][\S]*[\"]
+SIMBOLO = [ \/\!@#_$\^\&()\[\]\<\='`\"]
+COMENTARIO_UNA = [/][/][^\n\r]*
+COMENTARIO_MULTI = [<][!][^\!\>]*[!][>]
+
+%%
+
+// Definicion de tokens a usar
+"CONJ" {return new Symbol(sym.CONJ, yyline, yycolumn, yytext());}
+":" {return new Symbol(sym.DOSPT, yyline, yycolumn, yytext());}
+";" {return new Symbol(sym.PTCOMA,yyline,yycolumn, yytext());} 
+"-" {return new Symbol(sym.GUION, yyline, yycolumn, yytext());}
+">" {return new Symbol(sym.MAYORQUE,yyline,yycolumn, yytext());}
+"{" {return new Symbol(sym.LLAVEIZQ,yyline,yycolumn, yytext());} 
+"}" {return new Symbol(sym.LLAVEDER,yyline,yycolumn, yytext());} 
+"|" {return new Symbol(sym.BARRA,yyline,yycolumn, yytext());} 
+"." {return new Symbol(sym.PUNTO,yyline,yycolumn, yytext());} 
+"+" {return new Symbol(sym.MAS,yyline,yycolumn, yytext());} 
+"%" {return new Symbol(sym.PORCENTAJE,yyline,yycolumn, yytext());} 
+"*" {return new Symbol(sym.ASTERISCO,yyline,yycolumn, yytext());} 
+"?" {return new Symbol(sym.PREGUNTA,yyline,yycolumn, yytext());} 
+"~" {return new Symbol(sym.SYM_ENIE,yyline,yycolumn, yytext());} 
+"," {return new Symbol(sym.COMA,yyline,yycolumn, yytext());} 
+
+\n {yycolumn=1;}
+
+{BLANCOS} {} 
+{D} {return new Symbol(sym.ENTERO,yyline,yycolumn, yytext());} 
+{DD} {return new Symbol(sym.DECIMAL,yyline,yycolumn, yytext());}
+{L} {return new Symbol(sym.LETRA, yyline, yycolumn, yytext());}
+{CADENA} {return new Symbol(sym.CADENA, yyline, yycolumn, yytext());}
+{SIMBOLO} {return new Symbol(sym.SIMBOLO, yyline, yycolumn, yytext());}
+{COMENTARIO_UNA} {}
+{COMENTARIO_MULTI} {}
+. {
+    ErrorRef.list.add(new Error_("Se ha detectado un error de lexico. Caracter invalido.", "LEXICO", yytext(), String.valueOf(yyline), String.valueOf(yycolumn)));
+}
