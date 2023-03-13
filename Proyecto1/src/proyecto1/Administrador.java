@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.google.gson.Gson;
 
@@ -91,7 +90,7 @@ public class Administrador {
         String resultado = "";
         for (ObjCadena cadena : Cadena.list) {
             ArrayList<String> aceptado =new ArrayList<String>();
-            ArrayList<String> no_aceptado =new ArrayList<String>();
+//            ArrayList<String> no_aceptado =new ArrayList<String>();
             ArrayList<Integer> iterador =new ArrayList<Integer>();
             String name = cadena.getNombre();
             String s = cadena.getCadena();

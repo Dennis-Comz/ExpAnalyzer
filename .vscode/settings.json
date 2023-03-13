@@ -1,0 +1,7 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "Proyecto1/lib/gson-2.8.2.jar",
+        "Proyecto1/lib/java-cup-11b-runtime.jar"
+    ]
+}
